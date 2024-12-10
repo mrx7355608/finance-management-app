@@ -1,7 +1,68 @@
 import { View, StyleSheet } from "react-native";
+import ImageViewer from "../../components/my-components/ImageViewer";
+import Button from "../../components/my-components/Button";
+import { useEffect, useState } from "react";
+import Input from "@/components/my-components/Input";
+import ImagePickerButton from "@/components/my-components/ImagePickerButton";
+import * as SqliteDriver from "expo-sqlite";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { recordsSchema } from "@/db/schema";
 
-export default function AddRecords() {
-  return <View>Add records</View>;
+const expo = SqliteDriver.openDatabaseSync("mydb.db");
+const db = drizzle(expo);
+
+export default function AddRecord() {
+    // States for creating new records
+    const [boughtPrice, setBoughtPrice] = useState<number>(0);
+    const [soldPrice, setSoldPrice] = useState<number>(0);
+    const [image, setImage] = useState<string | undefined>(undefined);
+
+    const createNewRecordAsync = async () => {
+        if (!image) {
+            alert("Please select an image");
+            return;
+        }
+        try {
+            await db.insert(recordsSchema).values({
+                bought_price: boughtPrice,
+                sold_price: soldPrice,
+                image: image,
+            });
+            alert("Record has been creaed successfully");
+        } catch (err) {
+            console.log("ERROR", err);
+            alert("There was an error");
+        }
+    };
+
+    return (
+        <View style={styles.container}>
+            {!image ? (
+                <ImagePickerButton setSelectedImage={setImage} />
+            ) : (
+                <ImageViewer imgSource={image} selectedImage={image} />
+            )}
+            <Input
+                placeholder="Bought price"
+                onChangeText={(price: number) => setBoughtPrice(price)}
+            />
+            <Input
+                placeholder="Sold price"
+                onChangeText={(price: number) => setSoldPrice(price)}
+            />
+            <Button label="Create Record" onPress={createNewRecordAsync} />
+        </View>
+    );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#25292e",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    text: {
+        color: "#fff",
+    },
+});

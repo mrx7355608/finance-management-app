@@ -3,8 +3,8 @@ import React from "react";
 import { Platform } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
+import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
@@ -31,8 +31,12 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              size={23}
+              name={focused ? "home-sharp" : "home-outline"}
+              color={color}
+            />
           ),
         }}
       />
@@ -40,8 +44,12 @@ export default function TabLayout() {
         name="add-records"
         options={{
           title: "Add Record",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              size={23}
+              name={focused ? "add-circle-sharp" : "add-circle-outline"}
+              color={color}
+            />
           ),
         }}
       />
