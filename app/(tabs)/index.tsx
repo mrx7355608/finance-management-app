@@ -1,19 +1,13 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { ScrollView, StyleSheet, Text } from "react-native";
-import * as Sqlite from "expo-sqlite";
-import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useEffect } from "react";
 import { recordsSchema } from "@/db/schema";
 import Record from "@/components/my-components/Record";
 import { useNavigation } from "expo-router";
 import { needRefetch, setRefetch } from "@/refetch";
+import { setupDb } from "@/db/setup-db";
 
-const expo = Sqlite.openDatabaseSync("mydb.db");
-const db = drizzle(expo);
-
-expo.execSync(
-    "CREATE TABLE IF NOT EXISTS records (id integer PRIMARY KEY AUTOINCREMENT NOT NULL, image text NOT NULL, bought_price INTEGER NOT NULL, sold_price INTEGER DEFAULT 0);",
-);
+const db = setupDb();
 
 interface IRecord {
     id: number;

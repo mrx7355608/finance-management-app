@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { sqliteTable, int, index, text } from "drizzle-orm/sqlite-core";
 
 export const recordsSchema = sqliteTable(
@@ -18,6 +19,7 @@ export const expensesSchema = sqliteTable(
         item: text().notNull(),
         amount_spent: int().notNull(),
         record: int("record_id").references(() => recordsSchema.id),
+        date: text().default(sql`(CURRENT_DATE)`),
     },
     (table) => [index("record_idx").on(table.record)],
 );
