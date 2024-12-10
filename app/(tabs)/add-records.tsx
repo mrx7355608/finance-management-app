@@ -1,12 +1,13 @@
 import { View, StyleSheet } from "react-native";
 import ImageViewer from "../../components/my-components/ImageViewer";
 import Button from "../../components/my-components/Button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Input from "@/components/my-components/Input";
 import ImagePickerButton from "@/components/my-components/ImagePickerButton";
 import * as SqliteDriver from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { recordsSchema } from "@/db/schema";
+import { setRefetch } from "@/refetch";
 
 const expo = SqliteDriver.openDatabaseSync("mydb.db");
 const db = drizzle(expo);
@@ -16,6 +17,12 @@ export default function AddRecord() {
     const [boughtPrice, setBoughtPrice] = useState<number>(0);
     const [soldPrice, setSoldPrice] = useState<number>(0);
     const [image, setImage] = useState<string | undefined>(undefined);
+
+    const resetStates = () => {
+        setBoughtPrice(0);
+        setSoldPrice(0);
+        setImage(undefined);
+    };
 
     const createNewRecordAsync = async () => {
         if (!image) {
@@ -28,6 +35,8 @@ export default function AddRecord() {
                 sold_price: soldPrice,
                 image: image,
             });
+            setRefetch(true);
+            resetStates();
             alert("Record has been creaed successfully");
         } catch (err) {
             console.log("ERROR", err);
@@ -40,7 +49,7 @@ export default function AddRecord() {
             {!image ? (
                 <ImagePickerButton setSelectedImage={setImage} />
             ) : (
-                <ImageViewer imgSource={image} selectedImage={image} />
+                <ImageViewer selectedImage={image} />
             )}
             <Input
                 placeholder="Bought price"

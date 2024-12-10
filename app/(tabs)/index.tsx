@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { recordsSchema } from "@/db/schema";
 import Record from "@/components/my-components/Record";
 import { useNavigation } from "expo-router";
+import { needRefetch, setRefetch } from "@/refetch";
 
 const expo = Sqlite.openDatabaseSync("mydb.db");
 const db = drizzle(expo);
@@ -27,8 +28,11 @@ export default function HomeScreen() {
 
     useEffect(() => {
         const unsubscribe = navigation.addListener("focus", async () => {
-            const data = await db.select().from(recordsSchema);
-            setRecords(data);
+            if (needRefetch()) {
+                const data = await db.select().from(recordsSchema);
+                setRecords(data);
+                setRefetch(false);
+            }
         });
 
         return unsubscribe; // cleanup function
