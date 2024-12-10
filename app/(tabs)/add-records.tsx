@@ -46,18 +46,17 @@ export default function AddRecord() {
 
     return (
         <View style={styles.container}>
-            {!image ? (
-                <ImagePickerButton setSelectedImage={setImage} />
-            ) : (
-                <ImageViewer selectedImage={image} />
-            )}
+            {image && <ImageViewer image={image} />}
+            <ImagePickerButton setImage={setImage} />
             <Input
                 placeholder="Bought price"
                 onChangeText={(price: number) => setBoughtPrice(price)}
+                value={boughtPrice}
             />
             <Input
                 placeholder="Sold price"
                 onChangeText={(price: number) => setSoldPrice(price)}
+                value={soldPrice}
             />
             <Button label="Create Record" onPress={createNewRecordAsync} />
         </View>

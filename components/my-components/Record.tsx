@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import ImageViewer from "./ImageViewer";
+import { Image } from "expo-image";
 
 type Props = {
     source: string;
@@ -9,7 +9,7 @@ type Props = {
 export default function Record({ source }: Props) {
     return (
         <View style={styles.container}>
-            <ImageViewer selectedImage={source} />
+            <Image source={source} style={styles.image} />
         </View>
     );
 }
@@ -21,5 +21,11 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         flexDirection: "column",
         width: "100%",
+    },
+    image: {
+        width: "90%",
+        height: 150,
+        borderRadius: 18,
+        marginBottom: 20,
     },
 });
