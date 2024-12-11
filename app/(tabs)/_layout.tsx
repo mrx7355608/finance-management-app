@@ -9,50 +9,54 @@ import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+    const colorScheme = useColorScheme();
 
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-        headerShown: true,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
-          },
-          default: {},
-        }),
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ focused, color }) => (
-            <Ionicons
-              size={23}
-              name={focused ? "home-sharp" : "home-outline"}
-              color={color}
+    return (
+        <Tabs
+            screenOptions={{
+                tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+                headerShown: true,
+                tabBarButton: HapticTab,
+                tabBarBackground: TabBarBackground,
+                tabBarStyle: Platform.select({
+                    ios: {
+                        // Use a transparent background on iOS to show the blur effect
+                        position: "absolute",
+                    },
+                    default: {},
+                }),
+            }}
+        >
+            <Tabs.Screen
+                name="index"
+                options={{
+                    title: "Home",
+                    tabBarIcon: ({ focused, color }) => (
+                        <Ionicons
+                            size={23}
+                            name={focused ? "home-sharp" : "home-outline"}
+                            color={color}
+                        />
+                    ),
+                }}
             />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="add-records"
-        options={{
-          title: "Add Record",
-          tabBarIcon: ({ focused, color }) => (
-            <Ionicons
-              size={23}
-              name={focused ? "add-circle-sharp" : "add-circle-outline"}
-              color={color}
+            <Tabs.Screen
+                name="add-records"
+                options={{
+                    title: "Add Record",
+                    tabBarIcon: ({ focused, color }) => (
+                        <Ionicons
+                            size={23}
+                            name={
+                                focused
+                                    ? "add-circle-sharp"
+                                    : "add-circle-outline"
+                            }
+                            color={color}
+                        />
+                    ),
+                }}
             />
-          ),
-        }}
-      />
-    </Tabs>
-  );
+        </Tabs>
+    );
 }

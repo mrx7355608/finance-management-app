@@ -1,4 +1,4 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import ImageViewer from "../../components/my-components/ImageViewer";
 import Button from "../../components/my-components/Button";
 import { useState } from "react";
@@ -58,6 +58,7 @@ export default function AddRecord() {
                 onChangeText={(price: number) => setSoldPrice(price)}
                 value={soldPrice}
             />
+            <Text style={styles.heading}>Add expenses</Text>
             <Button label="Create Record" onPress={createNewRecordAsync} />
         </View>
     );
@@ -72,5 +73,12 @@ const styles = StyleSheet.create({
     },
     text: {
         color: "#fff",
+    },
+    heading: {
+        fontSize: 25,
+        fontWeight: 500,
+        color: "#fff",
+        textAlign: "center",
+        margin: 10,
     },
 });

@@ -1,16 +1,20 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Image } from "expo-image";
+import { Link } from "expo-router";
 
 type Props = {
+    id: number;
     source: string;
 };
 
-export default function Record({ source }: Props) {
+export default function Record({ id, source }: Props) {
     return (
-        <View style={styles.container}>
-            <Image source={source} style={styles.image} />
-        </View>
+        <Link href={`/record/${id}`}>
+            <View style={styles.container}>
+                <Image source={source} style={styles.image} />
+            </View>
+        </Link>
     );
 }
 

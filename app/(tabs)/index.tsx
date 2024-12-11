@@ -35,7 +35,9 @@ export default function HomeScreen() {
     return (
         <ScrollView>
             {records.length > 0 ? (
-                records.map((rec) => <Record key={rec.id} source={rec.image} />)
+                records.map((rec) => (
+                    <Record key={rec.id} id={rec.id} source={rec.image} />
+                ))
             ) : (
                 <Text style={styles.text}>No records available</Text>
             )}
