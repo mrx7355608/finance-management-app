@@ -58,7 +58,6 @@ export default function AddRecord() {
                 onChangeText={(price: number) => setSoldPrice(price)}
                 value={soldPrice}
             />
-            <Text style={styles.heading}>Add expenses</Text>
             <Button label="Create Record" onPress={createNewRecordAsync} />
         </View>
     );
