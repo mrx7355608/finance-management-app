@@ -28,7 +28,10 @@ export default function Record({ id, source }: Props) {
                 </Pressable>
 
                 {/* EDIT BUTTON */}
-                <Pressable style={styles.button}>
+                <Pressable
+                    style={styles.button}
+                    onPress={() => router.navigate(`/edit-record/${id}`)}
+                >
                     <Ionicons name="pencil" size={15} style={styles.icon} />
                     <Text style={styles.text}>Edit</Text>
                 </Pressable>

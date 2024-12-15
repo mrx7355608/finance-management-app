@@ -1,4 +1,4 @@
-import { StyleSheet, Pressable } from "react-native";
+import { StyleSheet } from "react-native";
 import { Image } from "expo-image";
 
 type Props = {
