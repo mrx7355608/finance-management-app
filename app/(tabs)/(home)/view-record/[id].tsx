@@ -5,6 +5,7 @@ import { useNavigation, useLocalSearchParams } from "expo-router";
 import { setupDb } from "@/db/setup-db";
 import { expensesSchema, recordsSchema } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { currencyFormat } from "@/utils/convert-currency";
 
 interface IRecord {
     id: number;
@@ -66,7 +67,7 @@ export default function ViewRecord() {
         const totalAmountSpent = totalExpenses + record.bought_price;
         const soldAmount = record.sold_price || 0;
         const profit = soldAmount - totalAmountSpent;
-        return profit;
+        return currencyFormat(profit);
     };
 
     const calculateTotalExpense = () => {
@@ -75,7 +76,7 @@ export default function ViewRecord() {
             0,
         );
         const totalAmountSpent = totalExpenses + record.bought_price;
-        return totalAmountSpent;
+        return currencyFormat(totalAmountSpent);
     };
 
     return (
@@ -84,18 +85,22 @@ export default function ViewRecord() {
                 <ImageViewer image={record.image} />
                 <View style={styles.expenses}>
                     <Text style={styles.text}>Bought Price:</Text>
-                    <Text style={styles.text}>Rs.{record.bought_price}/</Text>
+                    <Text style={styles.text}>
+                        Rs. {currencyFormat(record.bought_price)}/
+                    </Text>
                 </View>
                 <View style={styles.expenses}>
                     <Text style={styles.text}>Sold Price:</Text>
-                    <Text style={styles.text}>Rs.{record.sold_price}/</Text>
+                    <Text style={styles.text}>
+                        Rs. {currencyFormat(record.sold_price || 0)}/
+                    </Text>
                 </View>
                 {expenses.map((exp) => {
                     return (
                         <View key={exp.id} style={styles.expenses}>
                             <Text style={styles.text}>{exp.item}</Text>
                             <Text style={styles.text}>
-                                Rs.{exp.amount_spent}/
+                                Rs. {currencyFormat(exp.amount_spent)}/
                             </Text>
                         </View>
                     );
@@ -104,12 +109,12 @@ export default function ViewRecord() {
                 <View style={styles.expenses}>
                     <Text style={styles.text}>Total Expense:</Text>
                     <Text style={styles.text}>
-                        Rs.{calculateTotalExpense()}/
+                        Rs. {calculateTotalExpense()}/
                     </Text>
                 </View>
                 <View style={styles.expenses}>
                     <Text style={styles.text}>Profit:</Text>
-                    <Text style={styles.text}>Rs.{calculateProfit()}/</Text>
+                    <Text style={styles.text}>Rs. {calculateProfit()}/</Text>
                 </View>
             </View>
         </ScrollView>
