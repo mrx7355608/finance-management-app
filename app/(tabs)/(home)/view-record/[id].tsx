@@ -6,19 +6,23 @@ import { ExpenseItem } from "@/components/my-components/expenses";
 import { RecordsData } from "@/db/RecordsData";
 import { calculateProfit, calculateTotalExpense } from "@/utils/stats";
 import { IRecord, IExpense } from "@/utils/types";
+import { ExpenseData } from "@/db/ExpenseData";
 
 const recordsDB = new RecordsData();
+const expensesDB = new ExpenseData();
 
 export default function ViewRecord() {
-    const { id } = useLocalSearchParams();
+    const { id: recordID } = useLocalSearchParams();
     const [record, setRecord] = useState<IRecord | undefined>(undefined);
     const [expenses, setExpenses] = useState<IExpense[]>([]);
     const navigation = useNavigation();
 
     useEffect(() => {
         const unsubscribe = navigation.addListener("focus", async () => {
-            const data = await recordsDB.getOne(Number(id));
+            const data = await recordsDB.getOne(Number(recordID));
             setRecord(data);
+            const data2 = await expensesDB.getAll(Number(recordID));
+            setExpenses(data2);
         });
 
         return () => unsubscribe();

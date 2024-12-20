@@ -15,6 +15,11 @@ export interface IExpense {
     id: number;
     item: string;
     amount_spent: number;
+    date: string | null;
+    record: number | null;
+}
+export interface IExpenseInputData {
+    item: string;
+    amount_spent: number;
     record: number;
 }
-export interface IExpenseInputData extends Partial<IExpense> {}

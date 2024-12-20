@@ -1,73 +1,49 @@
-import { useState, useEffect } from "react";
-import { Text, View, ScrollView, StyleSheet } from "react-native";
-import { useNavigation, useLocalSearchParams } from "expo-router";
-import ImageViewer from "@/components/my-components/ImageViewer";
-import ImagePickerButton from "@/components/my-components/ImagePickerButton";
-import Input from "@/components/my-components/Input";
-import Button from "@/components/my-components/Button";
-import { recordsSchema, expensesSchema } from "@/db/schema";
-import { setupDb } from "@/db/setup-db";
 import { eq } from "drizzle-orm";
 import { setRefetch } from "@/refetch";
+import { useState, useEffect } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { RecordsData } from "@/db/RecordsData";
+import { IRecord, IExpenseInputData } from "@/utils/types";
+import { ExpenseForm } from "@/components/my-components/expenses";
+import { useNavigation, useLocalSearchParams } from "expo-router";
+import { Text, View, ScrollView, StyleSheet, Pressable } from "react-native";
+import {
+    ImageViewer,
+    ImagePickerButton,
+    Button,
+    Input,
+    Error,
+    Loading,
+} from "@/components/my-components";
+import { ExpenseData } from "@/db/ExpenseData";
 
-interface IRecord {
-    id: number;
-    bought_price: number;
-    sold_price: number | null;
-    image: string;
-}
-interface IExpense {
-    id: number;
-    item: string;
-    amount_spent: number;
-    record: number | null;
-}
+const recordsDB = new RecordsData();
+const expensesDB = new ExpenseData();
 
 export default function EditRecord() {
-    const db = setupDb();
     const navigation = useNavigation();
     const { id } = useLocalSearchParams();
     const [record, setRecord] = useState<IRecord | undefined>(undefined);
     const [loading, setLoading] = useState<Boolean>(true);
+    const [expenseUI, setExpenseUI] = useState<string[]>([]);
+    const [expenses, setExpenses] = useState<IExpenseInputData[]>([]);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener("focus", async () => {
-            const data = await db
-                .select()
-                .from(recordsSchema)
-                .where(eq(recordsSchema.id, Number(id)));
-
-            if (!data[0]) {
-                return;
-            }
-            setRecord(data[0]);
+            const data = await recordsDB.getOne(Number(id));
+            setRecord(data);
             setLoading(false);
-
-            // const data2 = await db
-            //     .select()
-            //     .from(expensesSchema)
-            //     .where(eq(expensesSchema.record, Number(id)));
-            //
-            // setExpenses(data2);
         });
 
-        return unsubscribe;
+        return () => unsubscribe();
     }, []);
 
     if (loading) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.error}>Loading...</Text>
-            </View>
-        );
+        return <Loading />;
     }
 
     if (!record) {
-        return (
-            <View>
-                <Text style={styles.error}>Record not found</Text>
-            </View>
-        );
+        return <Error message="Record not found" />;
     }
 
     const setImage = (newImage: string) => {
@@ -79,19 +55,43 @@ export default function EditRecord() {
     const setSoldPrice = (newPrice: number) => {
         setRecord({ ...record, sold_price: newPrice });
     };
+
+    const addExpenseUI = () => {
+        setExpenseUI([...expenseUI, ""]);
+        const newExpense = {
+            item: "",
+            amount_spent: 0,
+            record: record.id,
+        };
+        setExpenses([...expenses, newExpense]);
+    };
+
     const updateRecordAsync = async () => {
         try {
             console.log("updating...");
-            await db
-                .update(recordsSchema)
-                .set(record)
-                .where(eq(recordsSchema.id, record.id));
+
+            // FIXME: fix ``as any`` here
+            await recordsDB.update(record.id, record as any);
             setRefetch(true);
+
+            if (expenses.length > 0) {
+                await expensesDB.insert(expenses);
+            }
             alert("Updated successfully");
         } catch (err) {
             console.log(err);
             alert("ERROR, cannot update record");
         }
+    };
+
+    const logExpenses = () => console.log({ expenses });
+
+    const registerExpense = (index: number, item: string, amount: number) => {
+        setExpenses(() => {
+            expenses[index].item = item;
+            expenses[index].amount_spent = amount;
+            return expenses;
+        });
     };
 
     return (
@@ -109,7 +109,22 @@ export default function EditRecord() {
                     onChangeText={(price: number) => setSoldPrice(price)}
                     value={String(record.sold_price)}
                 />
+                <Text style={styles.heading}>Add Expenses</Text>
+                {expenseUI.map((_x, index) => {
+                    return (
+                        <ExpenseForm
+                            key={index}
+                            idx={index}
+                            registerExpense={registerExpense}
+                        />
+                    );
+                })}
+                <Pressable style={styles.button} onPress={addExpenseUI}>
+                    <Ionicons name="add-circle" size={20} style={styles.icon} />
+                    <Text style={styles.text}>Add</Text>
+                </Pressable>
                 <Button label="Update" onPress={updateRecordAsync} />
+                <Button label="Test" onPress={logExpenses} />
             </View>
         </ScrollView>
     );
@@ -129,5 +144,30 @@ const styles = StyleSheet.create({
         color: "red",
         fontWeight: 600,
         textAlign: "center",
+    },
+    heading: {
+        fontWeight: 500,
+        width: "100%",
+        textAlign: "left",
+        fontSize: 20,
+        marginTop: 10,
+        marginBottom: 5,
+        color: "white",
+    },
+    button: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "row",
+        width: "90%",
+        padding: 5,
+        borderRadius: 6,
+    },
+    text: {
+        color: "white",
+        fontWeight: 500,
+    },
+    icon: {
+        color: "white",
     },
 });
