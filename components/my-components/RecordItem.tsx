@@ -9,7 +9,7 @@ type Props = {
     source: string;
 };
 
-export default function Record({ id, source }: Props) {
+export default function RecordItem({ id, source }: Props) {
     const router = useRouter();
 
     return (

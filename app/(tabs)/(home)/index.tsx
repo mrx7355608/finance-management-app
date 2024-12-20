@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ScrollView, StyleSheet, Text } from "react-native";
 import { useEffect } from "react";
 import { recordsSchema } from "@/db/schema";
-import Record from "@/components/my-components/Record";
+import Record from "@/components/my-components/RecordItem";
 import { useNavigation } from "expo-router";
 import { needRefetch, setRefetch } from "@/refetch";
 import { setupDb } from "@/db/setup-db";

@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { sqliteTable, int, index, text } from "drizzle-orm/sqlite-core";
 
 export const recordsSchema = sqliteTable(

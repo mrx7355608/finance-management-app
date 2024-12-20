@@ -6,7 +6,9 @@ import { IRecordsInputData } from "@/utils/types";
 import { eq } from "drizzle-orm";
 
 export class RecordsData {
-    constructor(private db: ExpoSQLiteDatabase<typeof schema>) {
+    private db: ExpoSQLiteDatabase<typeof schema>;
+
+    constructor() {
         this.db = setupDb();
     }
 

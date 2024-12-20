@@ -1,121 +1,63 @@
 import { useState, useEffect } from "react";
-import { Text, View, ScrollView, StyleSheet } from "react-native";
-import ImageViewer from "@/components/my-components/ImageViewer";
 import { useNavigation, useLocalSearchParams } from "expo-router";
-import { setupDb } from "@/db/setup-db";
-import { expensesSchema, recordsSchema } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { currencyFormat } from "@/utils/convert-currency";
+import { View, ScrollView, StyleSheet } from "react-native";
+import { Error, ImageViewer } from "@/components/my-components";
+import { ExpenseItem } from "@/components/my-components/expenses";
+import { RecordsData } from "@/db/RecordsData";
+import { calculateProfit, calculateTotalExpense } from "@/utils/stats";
+import { IRecord, IExpense } from "@/utils/types";
 
-interface IRecord {
-    id: number;
-    bought_price: number;
-    sold_price: number | null;
-    image: string;
-}
-
-interface IExpense {
-    id: number;
-    item: string;
-    amount_spent: number;
-    record: number | null;
-}
+const recordsDB = new RecordsData();
 
 export default function ViewRecord() {
     const { id } = useLocalSearchParams();
     const [record, setRecord] = useState<IRecord | undefined>(undefined);
     const [expenses, setExpenses] = useState<IExpense[]>([]);
     const navigation = useNavigation();
-    const db = setupDb();
 
     useEffect(() => {
         const unsubscribe = navigation.addListener("focus", async () => {
-            const data = await db
-                .select()
-                .from(recordsSchema)
-                .where(eq(recordsSchema.id, Number(id)));
-
-            if (!data[0]) {
-                return;
-            }
-
-            const data2 = await db
-                .select()
-                .from(expensesSchema)
-                .where(eq(expensesSchema.record, Number(id)));
-
-            setRecord(data[0]);
-            setExpenses(data2);
+            const data = await recordsDB.getOne(Number(id));
+            setRecord(data);
         });
 
-        return unsubscribe;
+        return () => unsubscribe();
     }, []);
 
     if (!record) {
-        return (
-            <View>
-                <Text style={styles.error}>Record not found</Text>
-            </View>
-        );
+        return <Error message="Record not found" />;
     }
-
-    const calculateProfit = () => {
-        const totalExpenses = expenses.reduce(
-            (total, exp) => total + exp.amount_spent,
-            0,
-        );
-        const totalAmountSpent = totalExpenses + record.bought_price;
-        const soldAmount = record.sold_price || 0;
-        const profit = soldAmount - totalAmountSpent;
-        return currencyFormat(profit);
-    };
-
-    const calculateTotalExpense = () => {
-        const totalExpenses = expenses.reduce(
-            (total, exp) => total + exp.amount_spent,
-            0,
-        );
-        const totalAmountSpent = totalExpenses + record.bought_price;
-        return currencyFormat(totalAmountSpent);
-    };
 
     return (
         <ScrollView>
             <View style={styles.container}>
                 <ImageViewer image={record.image} />
-                <View style={styles.expenses}>
-                    <Text style={styles.text}>Bought Price:</Text>
-                    <Text style={styles.text}>
-                        Rs. {currencyFormat(record.bought_price)}/
-                    </Text>
-                </View>
-                <View style={styles.expenses}>
-                    <Text style={styles.text}>Sold Price:</Text>
-                    <Text style={styles.text}>
-                        Rs. {currencyFormat(record.sold_price || 0)}/
-                    </Text>
-                </View>
+                <ExpenseItem
+                    item="Bought Price:"
+                    amount={record.bought_price}
+                />
+                <ExpenseItem
+                    item="Sold Price:"
+                    amount={record.sold_price || 0}
+                />
                 {expenses.map((exp) => {
                     return (
-                        <View key={exp.id} style={styles.expenses}>
-                            <Text style={styles.text}>{exp.item}</Text>
-                            <Text style={styles.text}>
-                                Rs. {currencyFormat(exp.amount_spent)}/
-                            </Text>
-                        </View>
+                        <ExpenseItem
+                            key={exp.id}
+                            item={exp.item}
+                            amount={exp.amount_spent}
+                        />
                     );
                 })}
                 <View style={styles.divider}></View>
-                <View style={styles.expenses}>
-                    <Text style={styles.text}>Total Expense:</Text>
-                    <Text style={styles.text}>
-                        Rs. {calculateTotalExpense()}/
-                    </Text>
-                </View>
-                <View style={styles.expenses}>
-                    <Text style={styles.text}>Profit:</Text>
-                    <Text style={styles.text}>Rs. {calculateProfit()}/</Text>
-                </View>
+                <ExpenseItem
+                    item="Total Expenses: "
+                    amount={calculateTotalExpense(expenses, record)}
+                />
+                <ExpenseItem
+                    item="Proft: "
+                    amount={calculateProfit(expenses, record)}
+                />
             </View>
         </ScrollView>
     );
@@ -142,12 +84,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         width: "90%",
-    },
-    error: {
-        fontSize: 25,
-        color: "red",
-        fontWeight: 600,
-        textAlign: "center",
     },
     divider: {
         width: "90%",
