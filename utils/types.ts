@@ -16,7 +16,7 @@ export interface IExpense {
     item: string;
     amount_spent: number;
     date: string | null;
-    record: number | null;
+    record: number;
 }
 export interface IExpenseInputData {
     item: string;

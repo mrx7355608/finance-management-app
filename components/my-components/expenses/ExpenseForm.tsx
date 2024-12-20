@@ -1,40 +1,34 @@
-import { useState } from "react";
-import { View, StyleSheet, Pressable } from "react-native";
+import { View, StyleSheet } from "react-native";
 import Input from "../Input";
-import { Ionicons } from "@expo/vector-icons";
+import { useEffect } from "react";
+
+type Props = {
+    idx: number;
+    setItem: (index: number, item: string) => void;
+    setAmount: (index: number, amount: number) => void;
+    item: string;
+    amount: number;
+};
 
 export default function ExpenseForm({
     idx,
-    registerExpense,
-}: {
-    idx: number;
-    registerExpense: (index: number, item: string, amount: number) => void;
-}) {
-    const [item, setItem] = useState<string>("");
-    const [amount, setAmount] = useState<number>(0);
-
+    item,
+    amount,
+    setItem,
+    setAmount,
+}: Props) {
     return (
         <View style={styles.container}>
             <Input
                 placeholder="Item"
-                onChangeText={(itm: string) => setItem(itm)}
+                onChangeText={(itm: string) => setItem(idx, itm)}
                 value={item}
             />
             <Input
                 placeholder="Amount"
-                onChangeText={(amnt: number) => setAmount(amnt)}
-                value={amount}
+                onChangeText={(amnt: number) => setAmount(idx, amnt)}
+                value={String(amount)}
             />
-            <Pressable
-                style={{ backgroundColor: "blue" }}
-                onPress={() => registerExpense(idx, item, amount)}
-            >
-                <Ionicons
-                    name="checkmark"
-                    size={15}
-                    style={{ color: "white" }}
-                />
-            </Pressable>
         </View>
     );
 }

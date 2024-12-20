@@ -1,4 +1,3 @@
-import { eq } from "drizzle-orm";
 import { setRefetch } from "@/refetch";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -25,13 +24,14 @@ export default function EditRecord() {
     const { id } = useLocalSearchParams();
     const [record, setRecord] = useState<IRecord | undefined>(undefined);
     const [loading, setLoading] = useState<Boolean>(true);
-    const [expenseUI, setExpenseUI] = useState<string[]>([]);
     const [expenses, setExpenses] = useState<IExpenseInputData[]>([]);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener("focus", async () => {
             const data = await recordsDB.getOne(Number(id));
+            const data2 = await expensesDB.getAll(Number(id));
             setRecord(data);
+            setExpenses(data2 as any);
             setLoading(false);
         });
 
@@ -57,7 +57,6 @@ export default function EditRecord() {
     };
 
     const addExpenseUI = () => {
-        setExpenseUI([...expenseUI, ""]);
         const newExpense = {
             item: "",
             amount_spent: 0,
@@ -66,11 +65,9 @@ export default function EditRecord() {
         setExpenses([...expenses, newExpense]);
     };
 
+    // FIXME: fix ``as any`` here
     const updateRecordAsync = async () => {
         try {
-            console.log("updating...");
-
-            // FIXME: fix ``as any`` here
             await recordsDB.update(record.id, record as any);
             setRefetch(true);
 
@@ -86,12 +83,28 @@ export default function EditRecord() {
 
     const logExpenses = () => console.log({ expenses });
 
-    const registerExpense = (index: number, item: string, amount: number) => {
-        setExpenses(() => {
-            expenses[index].item = item;
-            expenses[index].amount_spent = amount;
-            return expenses;
-        });
+    const setItem = (index: number, item: string) => {
+        setExpenses(
+            expenses.map((exp, idx) => {
+                if (index === idx) {
+                    return { ...exp, item: item };
+                } else {
+                    return exp;
+                }
+            }),
+        );
+    };
+
+    const setAmount = (index: number, amount: number) => {
+        setExpenses(
+            expenses.map((exp, idx) => {
+                if (index === idx) {
+                    return { ...exp, amount_spent: amount };
+                } else {
+                    return exp;
+                }
+            }),
+        );
     };
 
     return (
@@ -110,12 +123,15 @@ export default function EditRecord() {
                     value={String(record.sold_price)}
                 />
                 <Text style={styles.heading}>Add Expenses</Text>
-                {expenseUI.map((_x, index) => {
+                {expenses.map((exp, index) => {
                     return (
                         <ExpenseForm
                             key={index}
                             idx={index}
-                            registerExpense={registerExpense}
+                            item={exp.item}
+                            amount={exp.amount_spent}
+                            setItem={setItem}
+                            setAmount={setAmount}
                         />
                     );
                 })}
