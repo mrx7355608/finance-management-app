@@ -22,7 +22,7 @@ export default function ViewRecord() {
             const data = await recordsDB.getOne(Number(recordID));
             setRecord(data);
             const data2 = await expensesDB.getAll(Number(recordID));
-            setExpenses(data2);
+            setExpenses(data2 as any);
         });
 
         return () => unsubscribe();

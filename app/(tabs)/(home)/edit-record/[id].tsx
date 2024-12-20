@@ -1,11 +1,12 @@
 import { setRefetch } from "@/refetch";
-import { useState, useEffect } from "react";
-import { Ionicons } from "@expo/vector-icons";
+import { useState, useEffect, useCallback } from "react";
 import { RecordsData } from "@/db/RecordsData";
 import { IRecord, IExpenseInputData } from "@/utils/types";
-import { ExpenseForm } from "@/components/my-components/expenses";
+import { ExpenseList } from "@/components/my-components/expenses";
 import { useNavigation, useLocalSearchParams } from "expo-router";
 import { Text, View, ScrollView, StyleSheet, Pressable } from "react-native";
+import { ExpenseData } from "@/db/ExpenseData";
+import { Ionicons } from "@expo/vector-icons";
 import {
     ImageViewer,
     ImagePickerButton,
@@ -14,7 +15,6 @@ import {
     Error,
     Loading,
 } from "@/components/my-components";
-import { ExpenseData } from "@/db/ExpenseData";
 
 const recordsDB = new RecordsData();
 const expensesDB = new ExpenseData();
@@ -25,6 +25,8 @@ export default function EditRecord() {
     const [record, setRecord] = useState<IRecord | undefined>(undefined);
     const [loading, setLoading] = useState<Boolean>(true);
     const [expenses, setExpenses] = useState<IExpenseInputData[]>([]);
+
+    const setMemoizedExpenses = useCallback(setExpenses, [expenses]);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener("focus", async () => {
@@ -56,15 +58,6 @@ export default function EditRecord() {
         setRecord({ ...record, sold_price: newPrice });
     };
 
-    const addExpenseUI = () => {
-        const newExpense = {
-            item: "",
-            amount_spent: 0,
-            record: record.id,
-        };
-        setExpenses([...expenses, newExpense]);
-    };
-
     // FIXME: fix ``as any`` here
     const updateRecordAsync = async () => {
         try {
@@ -83,28 +76,13 @@ export default function EditRecord() {
 
     const logExpenses = () => console.log({ expenses });
 
-    const setItem = (index: number, item: string) => {
-        setExpenses(
-            expenses.map((exp, idx) => {
-                if (index === idx) {
-                    return { ...exp, item: item };
-                } else {
-                    return exp;
-                }
-            }),
-        );
-    };
-
-    const setAmount = (index: number, amount: number) => {
-        setExpenses(
-            expenses.map((exp, idx) => {
-                if (index === idx) {
-                    return { ...exp, amount_spent: amount };
-                } else {
-                    return exp;
-                }
-            }),
-        );
+    const addExpenseUI = () => {
+        const newExpense = {
+            item: "",
+            amount_spent: 0,
+            record: Number(id),
+        };
+        setExpenses([...expenses, newExpense]);
     };
 
     return (
@@ -123,18 +101,11 @@ export default function EditRecord() {
                     value={String(record.sold_price)}
                 />
                 <Text style={styles.heading}>Add Expenses</Text>
-                {expenses.map((exp, index) => {
-                    return (
-                        <ExpenseForm
-                            key={index}
-                            idx={index}
-                            item={exp.item}
-                            amount={exp.amount_spent}
-                            setItem={setItem}
-                            setAmount={setAmount}
-                        />
-                    );
-                })}
+                {/* //FIXME: fix types */}
+                <ExpenseList
+                    expenses={expenses as any}
+                    setExpenses={setMemoizedExpenses as any}
+                />
                 <Pressable style={styles.button} onPress={addExpenseUI}>
                     <Ionicons name="add-circle" size={20} style={styles.icon} />
                     <Text style={styles.text}>Add</Text>

@@ -1,33 +1,44 @@
 import { View, StyleSheet } from "react-native";
 import Input from "../Input";
-import { useEffect } from "react";
+import { memo, useState } from "react";
+import { IExpense } from "@/utils/types";
 
 type Props = {
-    idx: number;
-    setItem: (index: number, item: string) => void;
-    setAmount: (index: number, amount: number) => void;
-    item: string;
-    amount: number;
+    index: number;
+    expense: IExpense;
+    updateFunctions: {
+        updateItemReference: (index: number, item: string) => void;
+        updateAmountReference: (index: number, amount: number) => void;
+    };
 };
 
 export default function ExpenseForm({
-    idx,
-    item,
-    amount,
-    setItem,
-    setAmount,
+    index,
+    expense,
+    updateFunctions,
 }: Props) {
+    const [item, setItem] = useState(expense.item);
+    const [amount, setAmount] = useState(expense.amount_spent);
+    const { updateItemReference, updateAmountReference } = updateFunctions;
+    console.log("renderin");
+
     return (
         <View style={styles.container}>
             <Input
                 placeholder="Item"
-                onChangeText={(itm: string) => setItem(idx, itm)}
                 value={item}
+                onChangeText={(value: string) => {
+                    setItem(value);
+                    updateItemReference(index, value);
+                }}
             />
             <Input
                 placeholder="Amount"
-                onChangeText={(amnt: number) => setAmount(idx, amnt)}
                 value={String(amount)}
+                onChangeText={(value: number) => {
+                    setAmount(value);
+                    updateAmountReference(index, value);
+                }}
             />
         </View>
     );
