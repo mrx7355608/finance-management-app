@@ -66,8 +66,12 @@ export default function EditRecord() {
     };
 
     const logExpenses = () => {
-        const expensesToEdit = expenses.filter((exp) => exp.edited == true);
         const expensesToInsert = expenses.filter((exp) => exp.id == undefined);
+        let expensesToEdit = expenses.filter((exp) => exp.edited == true);
+        expensesToEdit = expensesToEdit.map((exp) => {
+            delete exp.edited;
+            return exp;
+        });
         console.log({ expensesToInsert });
         console.log({ expensesToEdit });
         return { expensesToEdit, expensesToInsert };
@@ -79,7 +83,11 @@ export default function EditRecord() {
             const { expensesToInsert, expensesToEdit } = logExpenses();
 
             await recordsDB.update(record.id, record as any);
-            // await expensesDB.update();
+            if (expensesToEdit.length > 0) {
+                expensesToEdit.forEach(async (exp) => {
+                    await expensesDB.update(exp.id!, exp);
+                });
+            }
             if (expensesToInsert.length > 0) {
                 await expensesDB.insert(
                     expensesToInsert as IExpenseInputData[],
