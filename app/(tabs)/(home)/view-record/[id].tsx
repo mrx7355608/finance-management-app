@@ -40,10 +40,6 @@ export default function ViewRecord() {
                     item="Bought Price:"
                     amount={record.bought_price}
                 />
-                <ExpenseItem
-                    item="Sold Price:"
-                    amount={record.sold_price || 0}
-                />
                 {expenses.map((exp) => {
                     return (
                         <ExpenseItem
@@ -58,6 +54,11 @@ export default function ViewRecord() {
                     item="Total Expenses: "
                     amount={calculateTotalExpense(expenses, record)}
                 />
+                <ExpenseItem
+                    item="Sold Price:"
+                    amount={record.sold_price || 0}
+                />
+                <View style={styles.divider}></View>
                 <ExpenseItem
                     item="Proft: "
                     amount={calculateProfit(expenses, record)}
