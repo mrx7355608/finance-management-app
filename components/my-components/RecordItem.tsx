@@ -1,16 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, Pressable, Text } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import { RecordsData } from "@/db/RecordsData";
+import { setRefetch } from "@/refetch";
 
 type Props = {
     id: number;
     source: string;
 };
 
+const recordsDB = new RecordsData();
+
 export default function RecordItem({ id, source }: Props) {
     const router = useRouter();
+    const [visible, setVisible] = useState(false);
+
+    const onCancel = () => {
+        setVisible(false);
+    };
+
+    const onConfirm = async () => {
+        await recordsDB.remove(id);
+        setRefetch(true);
+        alert("Record deleted");
+        setVisible(false);
+    };
 
     return (
         <View style={styles.container}>
@@ -37,11 +54,19 @@ export default function RecordItem({ id, source }: Props) {
                 </Pressable>
 
                 {/* DELETE BUTTON */}
-                <Pressable style={styles.button}>
+                <Pressable
+                    style={styles.button}
+                    onPress={() => setVisible(true)}
+                >
                     <Ionicons name="trash-bin" size={15} style={styles.icon} />
                     <Text style={styles.text}>Delete</Text>
                 </Pressable>
             </View>
+            <DeleteConfirmationModal
+                visible={visible}
+                onConfirm={onConfirm}
+                onCancel={onCancel}
+            />
         </View>
     );
 }
