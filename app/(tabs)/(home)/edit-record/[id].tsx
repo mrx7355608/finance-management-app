@@ -1,7 +1,12 @@
 import { setRefetch } from "@/refetch";
 import { useState, useEffect, useCallback } from "react";
 import { RecordsData } from "@/db/RecordsData";
-import { IRecord, IExpenseInputData } from "@/utils/types";
+import {
+    IRecord,
+    IExpense,
+    IUpdateExpense,
+    IExpenseInputData,
+} from "@/utils/types";
 import { ExpenseList } from "@/components/my-components/expenses";
 import { useNavigation, useLocalSearchParams } from "expo-router";
 import { Text, View, ScrollView, StyleSheet, Pressable } from "react-native";
@@ -24,15 +29,17 @@ export default function EditRecord() {
     const { id } = useLocalSearchParams();
     const [record, setRecord] = useState<IRecord | undefined>(undefined);
     const [loading, setLoading] = useState<Boolean>(true);
-    const [expenses, setExpenses] = useState<IExpenseInputData[]>([]);
+    const [expenses, setExpenses] = useState<IUpdateExpense[]>([]);
 
     const setMemoizedExpenses = useCallback(setExpenses, [expenses]);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener("focus", async () => {
             const data = await recordsDB.getOne(Number(id));
-            const data2 = await expensesDB.getAll(Number(id));
+            let data2 = await expensesDB.getAll(Number(id));
             setRecord(data);
+
+            data2 = data2.map((exp) => ({ ...exp, edited: false }));
             setExpenses(data2 as any);
             setLoading(false);
         });
@@ -58,23 +65,33 @@ export default function EditRecord() {
         setRecord({ ...record, sold_price: newPrice });
     };
 
+    const logExpenses = () => {
+        const expensesToEdit = expenses.filter((exp) => exp.edited == true);
+        const expensesToInsert = expenses.filter((exp) => exp.id == undefined);
+        console.log({ expensesToInsert });
+        console.log({ expensesToEdit });
+        return { expensesToEdit, expensesToInsert };
+    };
+
     // FIXME: fix ``as any`` here
     const updateRecordAsync = async () => {
         try {
-            await recordsDB.update(record.id, record as any);
-            setRefetch(true);
+            const { expensesToInsert, expensesToEdit } = logExpenses();
 
-            if (expenses.length > 0) {
-                await expensesDB.insert(expenses);
+            await recordsDB.update(record.id, record as any);
+            // await expensesDB.update();
+            if (expensesToInsert.length > 0) {
+                await expensesDB.insert(
+                    expensesToInsert as IExpenseInputData[],
+                );
             }
+            setRefetch(true);
             alert("Updated successfully");
         } catch (err) {
             console.log(err);
             alert("ERROR, cannot update record");
         }
     };
-
-    const logExpenses = () => console.log({ expenses });
 
     const addExpenseUI = () => {
         const newExpense = {

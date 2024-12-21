@@ -36,6 +36,15 @@ export class ExpenseData {
         return updatedRecord;
     }
 
+    // Update many expenses
+    async updateMany(id: number, changes: Partial<IExpenseInputData>) {
+        const updatedRecord = await this.db
+            .update(expensesSchema)
+            .set(changes)
+            .where(eq(expensesSchema.id, id));
+        return updatedRecord;
+    }
+
     // Remove expense
     async remove(id: number) {
         await this.db.delete(expensesSchema).where(eq(expensesSchema.id, id));

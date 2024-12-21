@@ -23,3 +23,7 @@ export interface IExpenseInputData {
     amount_spent: number;
     record: number;
 }
+
+export interface IUpdateExpense extends Partial<IExpense> {
+    edited?: boolean;
+}

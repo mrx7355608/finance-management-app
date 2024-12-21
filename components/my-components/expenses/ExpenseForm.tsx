@@ -1,11 +1,11 @@
 import { View, StyleSheet } from "react-native";
 import Input from "../Input";
-import { memo, useState } from "react";
-import { IExpense } from "@/utils/types";
+import { useState } from "react";
+import { IUpdateExpense } from "@/utils/types";
 
 type Props = {
     index: number;
-    expense: IExpense;
+    expense: IUpdateExpense;
     updateFunctions: {
         updateItemReference: (index: number, item: string) => void;
         updateAmountReference: (index: number, amount: number) => void;

@@ -1,11 +1,11 @@
 import { Dispatch, memo, SetStateAction } from "react";
 import { View, StyleSheet } from "react-native";
 import ExpenseForm from "./ExpenseForm";
-import { IExpense } from "@/utils/types";
+import { IUpdateExpense } from "@/utils/types";
 
 type Props = {
-    expenses: IExpense[];
-    setExpenses: Dispatch<SetStateAction<IExpense[]>>;
+    expenses: IUpdateExpense[];
+    setExpenses: Dispatch<SetStateAction<IUpdateExpense[]>>;
 };
 
 function ExpenseList({ expenses, setExpenses }: Props) {
@@ -24,6 +24,9 @@ function ExpenseList({ expenses, setExpenses }: Props) {
     const updateItemReference = (index: number, item: string) => {
         setExpenses(() => {
             expenses[index].item = item;
+            if (expenses[index].edited !== undefined) {
+                expenses[index].edited = true;
+            }
             return expenses;
         });
     };
@@ -34,6 +37,9 @@ function ExpenseList({ expenses, setExpenses }: Props) {
     const updateAmountReference = (index: number, amount: number) => {
         setExpenses(() => {
             expenses[index].amount_spent = amount;
+            if (expenses[index].edited !== undefined) {
+                expenses[index].edited = true;
+            }
             return expenses;
         });
     };
@@ -58,24 +64,5 @@ function ExpenseList({ expenses, setExpenses }: Props) {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    button: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "row",
-        width: "90%",
-        padding: 5,
-        borderRadius: 6,
-    },
-    icon: {
-        color: "white",
-    },
-    text: {
-        color: "white",
-        fontWeight: 500,
-    },
-});
 
 export default memo(ExpenseList);
